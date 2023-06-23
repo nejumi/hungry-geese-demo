@@ -80,4 +80,4 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 ## Acknowledgments
 - Kaggle for providing the [Hungry Geese](https://www.kaggle.com/c/hungry-geese) environment.
-- yuricat and cazuki for the GeeseNet and related implementations.
+- yuricat and [kyazuki](https://www.kaggle.com/kyazuki) for the GeeseNet and related implementations.
