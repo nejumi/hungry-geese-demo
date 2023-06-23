@@ -3,7 +3,7 @@
 - Imitation Learning and Hyperparameter Search with Wandb
 
 ## Overview
-- This repository contains an imitation learning implementation to train an agent for the game "Hungry Geese" on Kaggle. This game requires a policy to navigate a game board with the aim of consuming food and avoiding collisions with the opponent's geese. We use a custom CNN model, named GeeseNet originally designed by yuricat and kyazuki, to capture spatial information from the game board.
+- This repository contains an imitation learning implementation to train an agent for the game ["Hungry Geese"](https://www.kaggle.com/c/hungry-geese) on Kaggle. This game requires a policy to navigate a game board with the aim of consuming food and avoiding collisions with the opponent's geese. We use a custom CNN model, named GeeseNet originally designed by yuricat and kyazuki, to capture spatial information from the game board.
 
 ## Prerequisites
 - Wandb account (for tracking experiments and hyperparameter search)
