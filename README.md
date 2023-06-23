@@ -73,6 +73,7 @@ wandb launch-sweep optuna_config_hungry_geese.yaml -q "your-queue-name" -p your-
 
 ## Results
 The training script uses the [Weights & Biases](https://wandb.ai/site) (wandb) platform to track the model's performance. After each epoch, the script logs the loss, accuracy, and win rate of the model. It also logs a GIF of a self-match episode for the agent. You can visualize these results on the wandb platform.
+![wandb_hungry_geese](https://github.com/nejumi/hungry-geese-demo/assets/24971026/a12deca1-9601-429d-b956-44917a138510)
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
