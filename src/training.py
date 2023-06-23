@@ -3,6 +3,10 @@
 import time
 import gc
 import collections
+import argparse
+from types import SimpleNamespace
+import warnings
+warnings.filterwarnings('ignore')
 
 import numpy as np
 import torch
@@ -13,6 +17,7 @@ from tqdm import tqdm
 from kaggle_environments import make
 import wandb
 
+from get_data import download_and_extract_dataset
 from data_processing import get_dataset, GeeseDataset
 from model import GeeseNet, create_submission_file
 from utils import create_folders_if_not_exist, get_path_list
@@ -24,6 +29,37 @@ criterion = {
 }
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
+
+# defaults
+default_config = SimpleNamespace(
+    layers = 12,
+    filters = 8,
+    batch_size = 2048,
+    data_folder = './episodes',
+    val_size = 100,
+    n_epochs = 3,
+    chunk_size = 500,
+    chunk_num = 1,
+    project = 'hungry-geeese-imitation-learning',
+    entity = None,
+)
+
+def parse_args():
+    "Overriding default argments"
+    argparser = argparse.ArgumentParser(description='Process hyper-parameters')
+    argparser.add_argument('--layers', type=int, default=default_config.layers, help='number of layers')
+    argparser.add_argument('--filters', type=int, default=default_config.filters, help='number of filters')
+    argparser.add_argument('--batch_size', type=int, default=default_config.batch_size, help='batch size')
+    argparser.add_argument('--data_folder', type=str, default=default_config.data_folder, help='path of training data folder')
+    argparser.add_argument('--val_size', type=int, default=default_config.val_size, help='size of validation set')
+    argparser.add_argument('--n_epochs', type=int, default=default_config.n_epochs, help='number of epochs for each chunk')
+    argparser.add_argument('--chunk_size', type=int, default=default_config.chunk_size, help='number of samples in each chunk')
+    argparser.add_argument('--chunk_num', type=int, default=default_config.chunk_num, help='number of chunks to be used for training')
+    argparser.add_argument('--project', type=str, default=default_config.project, help='project name for wandb')
+    argparser.add_argument('--entity', type=str, default=default_config.entity, help='entity name for wandb')
+    args = argparser.parse_args()
+    vars(default_config).update(vars(args))
+    return
 
 def create_dataloader(X_train, p_train, v_train, X_val, p_val, v_val, batch_size=2048, num_workers=1):
     train_dataset = GeeseDataset(X=X_train, p=p_train, v=v_train)
@@ -118,22 +154,29 @@ def val_epoch(loader, model, criterion, device):
 
     return val_loss, val_p_loss, val_v_loss, acc, avg_infer_time
 
-def run_sweep(config=None):
-    run = wandb.init(config=config)
+def train(config=None):
+    project = config.project
+    entity = config.entity
+    
+    run = wandb.init(project=project, entity=entity, config=config)
     config = wandb.config
 
     layers = config.layers
     filters = config.filters
-    data_folder = config.dataset_path
+    batch_size = config.batch_size
+    data_folder = config.data_folder
     val_size = config.val_size
     n_epochs = config.n_epochs
     chunk_size = config.chunk_size
     chunk_num = config.chunk_num
     
     print(f'layers :{layers}, filters: {filters}')
+    
+    # download training data
+    zip_path, base_path = download_and_extract_dataset(data_folder)
 
     # create necessary folders
-    folders_to_create = ['../models', '../videos', '../agents']
+    folders_to_create = ['./models', './videos', './agents']
     create_folders_if_not_exist(folders_to_create)
 
     # prepare validation set
@@ -148,6 +191,7 @@ def run_sweep(config=None):
         "epoch",
         "layers",
         "filters",
+        "batch_size",
         "win_rate",
         "val_loss", 
         "val_policy_loss",
@@ -163,13 +207,14 @@ def run_sweep(config=None):
     model = model.to(device)
 
     for n in tqdm(range(chunk_num)):
+        print('Convert json episodes to np.array...')
         X_train, p_train, v_train = get_dataset(path_list_train, n, chunk_size)
 
-        loaders = create_dataloader(X_train, p_train, v_train, X_val, p_val, v_val)
+        loaders = create_dataloader(X_train, p_train, v_train, X_val, p_val, v_val, batch_size=batch_size)
         optimizer = torch.optim.AdamW(model.parameters(), lr = 2e-2)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(T_max=10, optimizer=optimizer)
 
-
+        print('Start training...')
         for epoch in range(1, n_epochs+1):
             print(time.ctime(), 'Epoch:', epoch)
             scheduler.step(epoch-1)
@@ -179,27 +224,28 @@ def run_sweep(config=None):
             name = f'layers{layers}_filters{filters}_chunk{n}_epoch{epoch}'
 
             # save model
-            model_path = f'../models/{name}.pth'
+            model_path = f'./models/{name}.pth'
             torch.save(model.state_dict(), model_path)
 
             # create agent file
-            create_submission_file(model_path, './base.py', f'../agents/{name}.py', layers=layers, filters=filters)
+            create_submission_file(model_path, base_path, f'./agents/{name}.py', layers=layers, filters=filters)
 
             # evaluate agent
-            win_rate = evaluate_agent(f'../agents/{name}.py', n_matches=50)
+            win_rate = evaluate_agent(f'./agents/{name}.py', n_matches=50)
 
             # create video from self-match episode
-            create_gif_from_submission(f'../agents/{name}.py', f'../videos/{name}.gif')
+            create_gif_from_submission(f'./agents/{name}.py', f'./videos/{name}.gif')
 
             content = time.ctime() + ' ' + f'Training Number {n}, Epoch {epoch}, lr: {optimizer.param_groups[0]["lr"]:.7f}, val loss: {np.mean(val_loss):.5f}, val policy loss: {np.mean(val_p_loss):.5f}, val value loss: {np.mean(val_v_loss):.5f}, acc: {(acc):.5f}'
             print(content)
 
             # Add the results and the GIF image to the table
             row_data = [
-                wandb.Video(f'../videos/{name}.gif', fps=2, format="gif"),
+                wandb.Video(f'./videos/{name}.gif', fps=2, format="gif"),
                 n*n_epochs + epoch,
                 layers,
                 filters,
+                batch_size,
                 win_rate,
                 np.mean(val_loss),
                 np.mean(val_p_loss),
@@ -209,7 +255,7 @@ def run_sweep(config=None):
             ]
             table.add_data(*row_data)
 
-            wandb.log({
+            run.log({
                 "epoch": n*n_epochs + epoch,
                 "val_loss": np.mean(val_loss), 
                 "val_policy_loss": np.mean(val_p_loss),
@@ -217,19 +263,19 @@ def run_sweep(config=None):
                 "acc": acc, 
                 "avg_infer_time": avg_infer_time, 
                 "win_rate": win_rate,
-                "visualized episode": wandb.Video(f'../videos/{name}.gif', fps=2, format="gif")
+                "visualized episode": wandb.Video(f'./videos/{name}.gif', fps=2, format="gif")
             })
 
         # Log the artifact to Weights & Biases
         artifact = wandb.Artifact(f'{name}.pth', type="model")
         artifact.add_file(model_path, name=f'{name}.pth')
-        wandb.log_artifact(artifact)
+        run.log_artifact(artifact)
         print('model sent to wandb as an artifact')
 
         gc.collect()
         del X_train, p_train, v_train, loaders
 
-    wandb.log({"Results Table": table})
+    run.log({"Results Table": table})
     del model
     torch.cuda.empty_cache()
     run.finish()
@@ -244,3 +290,7 @@ def evaluate_agent(agent_file, n_matches=50):
         win_rates.append(win_rate[0])
 
     return sum(win_rates) / len(win_rates)
+
+if __name__ == '__main__':
+    parse_args()
+    train(default_config)

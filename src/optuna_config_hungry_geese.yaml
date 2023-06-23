@@ -1,0 +1,64 @@
+# optuna_config_basic.yaml
+description: optuna on launch demo
+# a basic training job to run
+job: launch-test/hungry-geeese-imitation-learning/job-https___github.com_nejumi_hungry-geese-demo_src_training.py:latest
+run_cap: 5
+metric:
+  name: val_loss
+  goal: minimize
+
+scheduler:
+  job: wandb/sweep-jobs/job-optuna-sweep-scheduler:latest
+  resource: local-container  # required for scheduler jobs sourced from images
+  num_workers: 1  # number of concurrent runs
+  settings:
+    sampler:
+      type: TPESampler
+      n_startup_trials: 3
+    pruner:
+      type: PercentilePruner
+      args:
+        percentile: 25.0  # kill 75% of runs
+        n_warmup_steps: 10  # pruning disabled for first x steps
+
+parameters:
+  data_folder:
+    values:
+      - ./episodes
+    distribution: categorical
+  chunk_size:
+    max: 6648
+    min: 63
+    distribution: int_uniform
+  batch_size:
+    max: 6356
+    min: 439
+    distribution: int_uniform
+  chunk_num:
+    max: 6
+    min: 1
+    distribution: int_uniform
+  val_size:
+    max: 636
+    min: 30
+    distribution: int_uniform
+  n_epochs:
+    max: 24
+    min: 2
+    distribution: int_uniform
+  project:
+    values:
+      - hungry-geeese-imitation-learning
+    distribution: categorical
+  filters:
+    max: 344
+    min: 12
+    distribution: int_uniform
+  layers:
+    max: 52
+    min: 3
+    distribution: int_uniform
+  entity:
+    values:
+      - launch-test
+    distribution: categorical

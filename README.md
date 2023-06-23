@@ -3,19 +3,80 @@
 - Imitation Learning and Hyperparameter Search with Wandb
 
 ## Overview
-- This project demonstrates how to perform imitation learning using existing episode data and hyperparameter search with the help of the Weights & Biases (Wandb) platform. The project is organized into several Python files and a YAML configuration file.
+- This repository contains an imitation learning implementation to train an agent for the game "Hungry Geese" on Kaggle. This game requires a policy to navigate a game board with the aim of consuming food and avoiding collisions with the opponent's geese. We use a custom CNN model, named GeeseNet originally designed by yuricat and kyazuki, to capture spatial information from the game board.
 
 ## Prerequisites
-- Wandb account (for tracking experiments and hyperparameter search)  
-- Kaggle account (for downloading episode dataset)  
+- Wandb account (for tracking experiments and hyperparameter search)
+
+## Repository Contents
+- `training.py` - The main script to train the model. It includes functions for training and validation of the model, hyper-parameter parsing, and creating a DataLoader for training and validation sets.
+
+- `get_data.py` - Script to download and extract the training dataset.
+
+- `data_processing.py` - Contains functions to process the downloaded dataset and return train and validation sets.
+
+- `model.py` - Defines the GeeseNet model and a function to create a submission file based on the trained model.
+
+- `utils.py` - Contains helper functions like creating folders, getting path lists, etc.
+
+- `visualization.py` - Contains a function to create a GIF from a submission for visualization purposes.
+
+- `optuna_config_hungry_geese.yaml` - Sample configuration file for optimization by Launch with Optuna.
 
 ## Getting Started
-- Clone the repository and navigate to the src directory containing the Python files.
+You can start by cloning the repository:
 
-- Install the required packages
+```bash
+git clone <repository-url>
+cd <repository-dir>
+```
 
-- Run get_data.py to download the data from Kaggle Datasets. You will be prompted to enter your Kaggle username and API Key.
+Next, install the required Python packages. It's recommended to create a new Python environment, and once you activate the environment, you can install the packages using:
 
-- Customize the config.yaml file according to your preferences.
+```bash
+pip install -r requirements.txt
+```
 
-- Run main.py to start the imitation learning process and hyperparameter search. The process will be tracked using Wandb.
+## Training
+You can train the model by running the training.py script:
+
+```bash
+python training.py
+```
+
+You can provide the following optional arguments:
+
+- `--layers`: number of layers in the `GeeseNet` model.
+- `--filters`: number of filters in each convolutional layer in the `GeeseNet` model.
+- `--batch_size`: the batch size used for training.
+- `--data_folder`: the path of the folder where the training data is located.
+- `--val_size`: the size of the validation set.
+- `--n_epochs`: the number of epochs to train each chunk.
+- `--chunk_size`: the number of samples in each chunk of the training data.
+- `--chunk_num`: the number of chunks to be used for training.
+- `--project`: project name for wandb.
+- `--entity`: entity name for wandb.
+
+For example:
+
+```bash
+python training.py --layers 16 --filters 16 --batch_size 4096
+```
+
+## Hyperparameter Optimization by Launch with Optuna
+WandB Sweeps can used to optimize hyperparameters. This can also be done more scalably on Launch. Please refer to the [documentation](https://docs.wandb.ai/guides/launch/sweeps-on-launch) for details on the settings.
+For example:
+
+```bash
+wandb launch-sweep optuna_config_hungry_geese.yaml -q "your-queue-name" -p your-project-name -e your-entity-name
+```
+
+## Results
+The training script uses the [Weights & Biases](https://wandb.ai/site) (wandb) platform to track the model's performance. After each epoch, the script logs the loss, accuracy, and win rate of the model. It also logs a GIF of a self-match episode for the agent. You can visualize these results on the wandb platform.
+
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Acknowledgments
+- Kaggle for providing the [Hungry Geese](https://www.kaggle.com/c/hungry-geese) environment.
+- yuricat and cazuki for the GeeseNet and related implementations.
