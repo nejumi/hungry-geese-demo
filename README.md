@@ -28,7 +28,7 @@ You can start by cloning the repository:
 
 ```bash
 git clone https://github.com/nejumi/hungry-geese-demo
-cd hungry-geese-demo
+cd hungry-geese-demo/src
 ```
 
 Next, install the required Python packages. It's recommended to create a new Python environment, and once you activate the environment, you can install the packages using:
