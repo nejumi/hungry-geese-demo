@@ -3,7 +3,7 @@
 - Imitation Learning and Hyperparameter Search with Wandb
 
 ## Overview
-- This repository contains an imitation learning implementation to train an agent for the game "Hungry Geese" on Kaggle. This game requires a policy to navigate a game board with the aim of consuming food and avoiding collisions with the opponent's geese. We use a custom CNN model, named GeeseNet originally designed by yuricat and kyazuki, to capture spatial information from the game board.
+- This repository contains an imitation learning implementation to train an agent for the game ["Hungry Geese"](https://www.kaggle.com/c/hungry-geese) on Kaggle. This game requires a policy to navigate a game board with the aim of consuming food and avoiding collisions with the opponent's geese. We use a custom CNN model, named GeeseNet originally designed by yuricat and kyazuki, to capture spatial information from the game board.
 
 ## Prerequisites
 - Wandb account (for tracking experiments and hyperparameter search)
@@ -27,8 +27,8 @@
 You can start by cloning the repository:
 
 ```bash
-git clone <repository-url>
-cd <repository-dir>
+git clone https://github.com/nejumi/hungry-geese-demo
+cd hungry-geese-demo/src
 ```
 
 Next, install the required Python packages. It's recommended to create a new Python environment, and once you activate the environment, you can install the packages using:
@@ -70,13 +70,15 @@ For example:
 ```bash
 wandb launch-sweep optuna_config_hungry_geese.yaml -q "your-queue-name" -p your-project-name -e your-entity-name
 ```
+Please change the yaml file, including the name of the job, according to your requirements.
 
 ## Results
 The training script uses the [Weights & Biases](https://wandb.ai/site) (wandb) platform to track the model's performance. After each epoch, the script logs the loss, accuracy, and win rate of the model. It also logs a GIF of a self-match episode for the agent. You can visualize these results on the wandb platform.
+![wandb_hungry_geese](https://github.com/nejumi/hungry-geese-demo/assets/24971026/a12deca1-9601-429d-b956-44917a138510)
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 ## Acknowledgments
 - Kaggle for providing the [Hungry Geese](https://www.kaggle.com/c/hungry-geese) environment.
-- yuricat and cazuki for the GeeseNet and related implementations.
+- yuricat and [kyazuki](https://www.kaggle.com/kyazuki) for the GeeseNet and related implementations.
