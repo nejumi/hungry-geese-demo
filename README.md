@@ -70,6 +70,7 @@ For example:
 ```bash
 wandb launch-sweep optuna_config_hungry_geese.yaml -q "your-queue-name" -p your-project-name -e your-entity-name
 ```
+Please change the yaml file, including the name of the job, according to your requirements.
 
 ## Results
 The training script uses the [Weights & Biases](https://wandb.ai/site) (wandb) platform to track the model's performance. After each epoch, the script logs the loss, accuracy, and win rate of the model. It also logs a GIF of a self-match episode for the agent. You can visualize these results on the wandb platform.
