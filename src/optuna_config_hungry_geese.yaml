@@ -1,7 +1,7 @@
-# optuna_config_basic.yaml
+# optuna_config_hungry_geese.yaml
 description: optuna on launch demo
 # a basic training job to run
-job: launch-test/hungry-geeese-imitation-learning/job-https___github.com_nejumi_hungry-geese-demo_src_training.py:latest
+job: your-entity/your-project/job-https___github.com_nejumi_hungry-geese-demo_src_training.py:latest
 run_cap: 5
 metric:
   name: val_loss
@@ -27,38 +27,30 @@ parameters:
       - ./episodes
     distribution: categorical
   chunk_size:
-    max: 6648
-    min: 63
+    max: 3000
+    min: 100
     distribution: int_uniform
   batch_size:
-    max: 6356
-    min: 439
+    max: 2048
+    min: 64
     distribution: int_uniform
   chunk_num:
-    max: 6
+    max: 11
     min: 1
     distribution: int_uniform
-  val_size:
-    max: 636
-    min: 30
-    distribution: int_uniform
   n_epochs:
-    max: 24
-    min: 2
+    max: 11
+    min: 1
     distribution: int_uniform
   project:
     values:
       - hungry-geeese-imitation-learning
     distribution: categorical
   filters:
-    max: 344
-    min: 12
+    max: 128
+    min: 4
     distribution: int_uniform
   layers:
-    max: 52
-    min: 3
+    max: 64
+    min: 4
     distribution: int_uniform
-  entity:
-    values:
-      - launch-test
-    distribution: categorical
