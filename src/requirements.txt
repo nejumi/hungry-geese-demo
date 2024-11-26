@@ -57,5 +57,4 @@ pathlib==1.0.1
 cmake==3.30.5
 numba==0.60.0
 pip==24.1.2
-blinker==1.4
 six==1.16.0
