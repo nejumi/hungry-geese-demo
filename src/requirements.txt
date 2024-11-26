@@ -19,7 +19,8 @@ dm-tree==0.1.8
 widgetsnbextension==3.6.10
 tf_keras==2.17.0
 jupyter_core==5.7.2
-albumentations==1.4.20Flask==3.0.3
+albumentations==1.4.20
+Flask==3.0.3
 intel-cmplr-lib-ur==2025.0.0
 torch==2.5.1+cu121
 gym==0.25.2
