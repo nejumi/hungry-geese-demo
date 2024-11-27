@@ -33,6 +33,7 @@ git clone https://github.com/nejumi/hungry-geese-demo
 Next, install the required Python packages. It's recommended to create a new Python environment, and once you activate the environment, you can install the packages using:
 
 ```bash
+cd hungry-geese-demo
 pip install -r requirements.txt
 ```
 
@@ -40,7 +41,7 @@ pip install -r requirements.txt
 You can train the model by running the training.py script:
 
 ```bash
-cd hungry-geese-demo/src
+cd src
 python training.py
 ```
 
